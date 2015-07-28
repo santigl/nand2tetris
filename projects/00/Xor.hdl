@@ -1,0 +1,23 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/00/Xor.hdl
+
+/**
+ *  Exclusive-or gate:
+ *  out = 1 if ((a == 1 and b == 0) or ((a == 0 and b == 1))
+ *        0 otherwise
+ */
+
+// Primitive implementation using 4 NAND gates.
+CHIP Xor {
+
+    IN a, b;
+    OUT out;
+
+    PARTS:
+    Nand(a=a, b=b, out=i0);
+   	Nand(a=i0, b=a, out=i1);
+   	Nand(a=i0, b=b, out=i2);
+   	Nand(a=i1, b=i2, out=out);
+}

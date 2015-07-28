@@ -1,0 +1,84 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/02/ALU.hdl
+
+/**
+ * The ALU (Arithmetic Logic Unit).
+ * Computes one of the following functions:
+ * x+y, x-y, y-x, 0, 1, -1, x, y, -x, -y, !x, !y,
+ * x+1, y+1, x-1, y-1, x&y, x|y on two 16-bit inputs, 
+ * according to 6 input bits denoted zx,nx,zy,ny,f,no.
+ * In addition, the ALU computes two 1-bit outputs:
+ * if the ALU output == 0, zr is set to 1; otherwise zr is set to 0;
+ * if the ALU output < 0, ng is set to 1; otherwise ng is set to 0.
+ */
+
+// Implementation: the ALU logic manipulates the x and y inputs
+// and operates on the resulting values, as follows:
+// if (zx == 1) set x = 0        // 16-bit constant
+// if (nx == 1) set x = !x       // bitwise not
+// if (zy == 1) set y = 0        // 16-bit constant
+// if (ny == 1) set y = !y       // bitwise not
+// if (f == 1)  set out = x + y  // integer 2's complement addition
+// if (f == 0)  set out = x & y  // bitwise and
+// if (no == 1) set out = !out   // bitwise not
+// if (out == 0) set zr = 1
+// if (out < 0) set ng = 1
+
+CHIP ALU {
+    IN  
+        x[16], y[16],  // 16-bit inputs        
+        zx, // zero the x input?
+        nx, // negate the x input?
+        zy, // zero the y input?
+        ny, // negate the y input?
+        f,  // compute out = x + y (if 1) or x & y (if 0)
+        no; // negate the out output?
+
+    OUT 
+        out[16], // 16-bit output
+        zr, // 1 if (out == 0), 0 otherwise
+        ng; // 1 if (out < 0),  0 otherwise
+
+    PARTS:
+    // Control bits.
+    Not(in=zx, out=nzx);
+    Not(in=zy, out=nzy);
+    Not(in=f, out=nf);
+    // Connecting them to buses. 
+    Bit2Bus(in=f, out=fBus);        // !and / add
+    Bit2Bus(in=nzx, out=nzxBus);    // !Zero x
+    Bit2Bus(in=nzy, out=nzyBus);    // !Zero y
+    Bit2Bus(in=nf, out=nfBus);      // and/!add
+    Bit2Bus(in=nx, out=nxBus);      // Negate x
+    Bit2Bus(in=ny, out=nyBus);      // Negate y
+    Bit2Bus(in=no, out=noBus);      // Negate the result
+
+
+    // Input Stage:
+    And16(a=x, b=nzxBus, out=ix0);      // This zeroes y if !zx.
+    Xor16(a=ix0, b=nxBus, out=ALUx);    // If !zx => negates x.
+
+    And16(a=y, b=nzyBus, out=iy0);      // This zeroes y if !zy.
+    Xor16(a=iy0, b=nyBus, out=ALUy);    // If !zy => negates y.
+
+    // AND Stage:
+    And16(a=ALUx, b=ALUy, out=ANDxy);   // Keep the result from the And16 only
+    And16(a=ANDxy, b=nfBus, out=ANDout);// if f==0. If not, zero all.
+
+    // ADD Stage:
+    Add16(a=ALUx, b=ALUy, out=ADDxy);   // Keep the result from the adder only
+    And16(a=ADDxy, b=fBus, out=ADDout); // if f==1. If not, zero all.
+
+    // Result:
+    Or16(a=ANDout, b=ADDout, out=ALUres);
+    /* (Since the unwanted operation's result is all zeroes, combine both buses
+    with OR.) */
+
+    // Output:
+    Xor16(a=ALUres, b=noBus, out=out, out=ALUout);   // If ng => negate the result.
+
+    // Flags
+    FlagExtractor(in=ALUout, z=zr, neg=ng);
+}

@@ -1,0 +1,21 @@
+/* 
+* This chip gets a 16 bit value and calculates its Z and NEG flags.
+* The negative flag is easy work: As it assumes the value is encoded in two's 
+* complement, it just outputs its most significant bit.
+* For the zero flag, well... it just ORs all 16 bits and negates the result.
+*/
+
+CHIP FlagExtractor {
+    IN in[16];
+    OUT z, neg;
+
+    PARTS:
+    // Negative flag:
+    And(a=in[15], b=true, out=neg); // Returns the MSB (2's complement.)
+
+    // Zero flag:
+    Or8Way(in=in[0..7], out=o0);
+    Or8Way(in=in[8..15], out=o1);
+    Or(a=o0, b=o1, out=nz);
+    Not(in=nz, out=z);
+}

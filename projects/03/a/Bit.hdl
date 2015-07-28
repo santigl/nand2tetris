@@ -1,0 +1,25 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/03/a/Bit.hdl
+
+/**
+ * 1-bit register:
+ * If load[t] == 1 then out[t+1] = in[t]
+ *                 else out does not change (out[t+1] = out[t])
+ */
+
+/* Since it is not possible to access to clock pin nor inputs, a MUX comes in
+* handy. While load is not enabled it makes a loop between the DFF output 
+* and its input. Otherwise, it connects the incoming bit.
+* The clock is independent. 
+*/
+
+CHIP Bit {
+    IN in, load;
+    OUT out;
+
+    PARTS:
+    Mux(a=loop0, b=in, sel=load, out=i0); 
+    DFF(in=i0, out=loop0, out=out);
+}

@@ -1,0 +1,23 @@
+valid_commands_ ({ 
+// Stack
+"push",
+"pop",
+// Arithmetic
+"add",
+"sub",
+"neg",
+"eq",
+"gt",
+"lt",
+"and",
+"or",
+"not",
+// Program Flow
+"label",
+"goto",
+"if-goto",
+// Function calling
+"function",
+"call",
+"return"
+})
