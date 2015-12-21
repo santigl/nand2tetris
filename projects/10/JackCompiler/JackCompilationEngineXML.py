@@ -12,9 +12,9 @@ class JackCompilationEngineXML():
 	def compileClass(self):
 		self._startSection("class")
 
-		self._writeKeyword()	# "Class"
-		self._writeIdentifier()	#  className
-		self._writeSymbol()		# '{'
+		self._writeKeyword()    # "Class"
+		self._writeIdentifier() #  className
+		self._writeSymbol()     # '{'
 
 		# Variable declarations:
 		if self.tokenizer.keyWord() in ["STATIC", "FIELD"]:
@@ -25,63 +25,63 @@ class JackCompilationEngineXML():
 											"METHOD", "VOID"]):
 			self.compileSubroutine()
 
-		self._writeSymbol()		# '}'
-		self._endSection("class")	
+		self._writeSymbol()     # '}'
+		self._endSection("class")   
 
 	def compileClassVarDec(self):
 		# While there are lines declaring variables... (There could be 0.)
 		while (self._tokenMatchesKeyword("STATIC") or
 			   self._tokenMatchesKeyword("FIELD")):
 			self._startSection("classVarDec")
-			self._writeKeyword() 		# "static"/"field"
-			self._writeType()			# Var. type
-			self._writeIdentifier()		# Var. name
+			self._writeKeyword()        # "static"/"field"
+			self._writeType()           # Var. type
+			self._writeIdentifier()     # Var. name
 
 			# Are there more variables in the same line?
 			while self.tokenizer.symbol() == ',':
 				self._writeSymbol()
-				self._writeIdentifier()	# Var. name
+				self._writeIdentifier() # Var. name
 
-			self._writeSymbol() 		# ';' symbol at the end of the line.
+			self._writeSymbol()         # ';' symbol at the end of the line.
 			self._endSection("classVarDec")
 
 
 	def compileSubroutine(self):
 		self._startSection("subroutineDec")
-		self._writeKeyword()		# Constructor/Function/Method
+		self._writeKeyword()        # Constructor/Function/Method
 
-		self._writeType()			# Return type
+		self._writeType()           # Return type
 
-		self._writeIdentifier()		# Subroutine name
-		self.compileParameterList()	# Parameters (may be empty)
+		self._writeIdentifier()     # Subroutine name
+		self.compileParameterList() # Parameters (may be empty)
 
 		# Body:
 		self._startSection("subroutineBody")
-		self._writeSymbol()			# '{'
+		self._writeSymbol()         # '{'
 
 		if self.tokenizer.keyWord() == "VAR":
 			self.compileVarDec() 
 
 		if not self._tokenMatchesSymbol('}'):
 			self.compileStatements()
-		self._writeSymbol()			# '}' (end of subroutine body.)
+		self._writeSymbol()         # '}' (end of subroutine body.)
 		self._endSection("subroutineBody")
 
 		self._endSection("subroutineDec")
 
 
 	def compileParameterList(self):
-		self._writeSymbol()					# '('
+		self._writeSymbol()                 # '('
 		self._startSection("parameterList")
 
 		while self.tokenizer.symbol() != ')':
-			self._writeKeyword()			# Type
-			self._writeIdentifier()			# Name
+			self._writeKeyword()            # Type
+			self._writeIdentifier()         # Name
 			# More parameters?
 			if self.tokenizer.symbol() == ',':
 				self._writeSymbol()
 
-		self._endSection("parameterList")	# ')'
+		self._endSection("parameterList")   # ')'
 		self._writeSymbol()
 
 
@@ -89,16 +89,16 @@ class JackCompilationEngineXML():
 		# While there are lines declaring variables... (There could be 0.)
 		while self._tokenMatchesKeyword("VAR"):
 			self._startSection("varDec")
-			self._writeKeyword()	# "Var"
-			self._writeType()		# Var. type
-			self._writeIdentifier()	# Var name
+			self._writeKeyword()    # "Var"
+			self._writeType()       # Var. type
+			self._writeIdentifier() # Var name
 
 			# Are there more variables in the same line?
 			while self.tokenizer.symbol() == ',':
 				self._writeSymbol()
-				self._writeIdentifier()	# Variable name.
+				self._writeIdentifier() # Variable name.
 
-			self._writeSymbol()	# ';' symbol at the end of the line.
+			self._writeSymbol() # ';' symbol at the end of the line.
 			self._endSection("varDec")
 		
 
@@ -128,16 +128,16 @@ class JackCompilationEngineXML():
 		self._startSection("doStatement")
 		self._incIndentLevel()
 
-		self._writeKeyword()		# "Do"
-		self._writeIdentifier()		# Subroutine name/(class/var):
+		self._writeKeyword()        # "Do"
+		self._writeIdentifier()     # Subroutine name/(class/var):
 
 		if self._tokenMatchesSymbol('.'):
-			self._writeSymbol()		# '.'
-			self._writeIdentifier()	# Method name
+			self._writeSymbol()     # '.'
+			self._writeIdentifier() # Method name
 
 		self.compileExpressionList()
 
-		self._writeSymbol()			# ';'
+		self._writeSymbol()         # ';'
 
 		self._decIndentLevel()
 		self._endSection("doStatement")
@@ -151,28 +151,28 @@ class JackCompilationEngineXML():
 		# Variable name:
 		self._writeIdentifier()
 
-		if self.tokenizer.symbol() == ']':
-			self._writeSymbol()			#'['
-			self.compileExpression()	# expr
-			self._writeSymbol()			#'['
+		if self.tokenizer.symbol() == '[':
+			self._writeSymbol()         #'['
+			self.compileExpression()    # expr
+			self._writeSymbol()         #']'
 
-		self._writeSymbol()				# '='
+		self._writeSymbol()             # '='
 		self.compileExpression()
 
-		self._writeSymbol()	#';'
+		self._writeSymbol() #';'
 		self._endSection("letStatement")
 
 	def compileWhile(self):
 		self._startSection("whileStatement")
 
-		self._writeKeyword() 		# "While"
-		self._writeSymbol() 		# '('
-		self.compileExpression()	# condition
-		self._writeSymbol() 		# ')'
+		self._writeKeyword()        # "While"
+		self._writeSymbol()         # '('
+		self.compileExpression()    # condition
+		self._writeSymbol()         # ')'
 
-		self._writeSymbol() 		# '{'
+		self._writeSymbol()         # '{'
 		self.compileStatements()
-		self._writeSymbol() 		# '}'
+		self._writeSymbol()         # '}'
 
 		self._endSection("whileStatement")
 
@@ -193,20 +193,20 @@ class JackCompilationEngineXML():
 
 	def compileIf(self):
 		self._startSection("ifStatement")
-		self._writeKeyword() 			# "If"
-		self._writeSymbol() 			# '('
-		self.compileExpression()		# condition
-		self._writeSymbol() 			# ')'
+		self._writeKeyword()            # "If"
+		self._writeSymbol()             # '('
+		self.compileExpression()        # condition
+		self._writeSymbol()             # ')'
 
-		self._writeSymbol() 			# '{'
-		self.compileStatements()		# (...)
-		self._writeSymbol()				# '}'
+		self._writeSymbol()             # '{'
+		self.compileStatements()        # (...)
+		self._writeSymbol()             # '}'
 
 		if self._tokenMatchesKeyword("ELSE"):
-			self._writeKeyword() 		# "Else"
-			self._writeSymbol() 		# '{'
-			self.compileStatements() 	# (...)
-			self._writeSymbol() 		# '}'
+			self._writeKeyword()        # "Else"
+			self._writeSymbol()         # '{'
+			self.compileStatements()    # (...)
+			self._writeSymbol()         # '}'
 
 		self._endSection("ifStatement")
 
@@ -214,10 +214,9 @@ class JackCompilationEngineXML():
 		self._startSection("expression")
 		self.compileTerm()
 
-		if self._tokenIsOperator():
+		while self._tokenIsOperator():
 			self._writeSymbol()
 			self.compileTerm()
-
 
 		self._endSection("expression")
 
@@ -228,19 +227,19 @@ class JackCompilationEngineXML():
 		self._startSection("term")
 		tokenType = self.tokenizer.tokenType()
 
-		if self._tokenIsKeywordConstant():	# keywordConstant
+		if self._tokenIsKeywordConstant():  # keywordConstant
 			self._writeKeyword()
 
-		elif tokenType == "INT_CONST": 		# integerConstant
+		elif tokenType == "INT_CONST":      # integerConstant
 			self._writeIntVal()
 
-		elif tokenType == "STRING_CONST":	# stringConstant
+		elif tokenType == "STRING_CONST":   # stringConstant
 			self._writeStringVal()
 
-		elif tokenType == "IDENTIFIER":		# varName
+		elif tokenType == "IDENTIFIER":     # varName
 			self._writeIdentifier()
 			# Is it an array?
-			if self._tokenMatchesSymbol('['): 	# '[' expression']'
+			if self._tokenMatchesSymbol('['):   # '[' expression']'
 				self._writeSymbol() # '['
 				self.compileExpression()
 				self._writeSymbol() # ']'
@@ -248,25 +247,27 @@ class JackCompilationEngineXML():
 			elif self._tokenMatchesSymbol('('): # '(' expression ')' 
 				self._writeSymbol()
 				self.compileExpressionList()
+				self._writeSymbol()
 			# Is it a method call?
 			elif self._tokenMatchesSymbol('.'):
 				self._writeSymbol()
 				self._writeIdentifier()
 				self.compileExpressionList()
 
-		elif self._tokenMatchesSymbol('('):	# '(' Expression ')'
+		elif self._tokenMatchesSymbol('('): # '(' Expression ')'
 			self._writeSymbol() # '('
 			self.compileExpression()
 			self._writeSymbol() # ')'
 
-		elif self._tokenIsUnaryOperator():	# unaryOp term
+		elif self._tokenIsUnaryOperator():  # unaryOp term
 			self._writeSymbol()
 			self.compileTerm()
 
 		self._endSection("term")
 
+
 	def compileExpressionList(self):
-		self._writeSymbol()	# '('
+		self._writeSymbol() # '('
 		self._startSection("expressionList")
 
 		# While there are expressions...
@@ -276,7 +277,7 @@ class JackCompilationEngineXML():
 				self._writeSymbol()
 
 		self._endSection("expressionList")
-		self._writeSymbol()	# ')'
+		self._writeSymbol() # ')'
 
 	# --- PRIVATE functions --- #
 	def _writeLine(self, line):
@@ -293,7 +294,7 @@ class JackCompilationEngineXML():
 		self._writeLine("<identifier> " 
 						+ self.tokenizer.identifier() 
 						+ " </identifier>")
-		self.tokenizer.advance()		
+		self.tokenizer.advance()        
 
 	def _writeSymbol(self):
 		symbol = self.tokenizer.symbol()
@@ -313,12 +314,12 @@ class JackCompilationEngineXML():
 		self._writeLine("<integerConstant> "
 						+ str(self.tokenizer.intVal())
 						+ " </integerConstant>")
-		self.tokenizer.advance()		
+		self.tokenizer.advance()        
 
 	def _writeStringVal(self):
-		self._writeLine("<stringVal> "
-					 	+ self.tokenizer.stringVal()
-					 	+ " </stringVal>")
+		self._writeLine("<stringConstant> "
+						+ self.tokenizer.stringVal()
+						+ " </stringConstant>")
 		self.tokenizer.advance()
 
 	def _writeType(self):
@@ -344,7 +345,7 @@ class JackCompilationEngineXML():
 		return self._tokenIsSymbol() and self.tokenizer.symbol() == symbol
 
 	def _tokenMatchesKeyword(self, kw):
-		return self._tokenIsKeyword() and self.tokenizer.keyWord() == kw	
+		return self._tokenIsKeyword() and self.tokenizer.keyWord() == kw    
 
 	def _tokenIsOperator(self):
 		return(self._tokenIsSymbol() and
