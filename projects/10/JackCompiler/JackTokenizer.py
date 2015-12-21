@@ -15,10 +15,10 @@ WHITE_SPACE = [' ', '\n', '\t']
 
 
 class JackTokenizer:
-	_tokenTypes 		= frozenset(TOKEN_TYPES)
-	_keywords 			= frozenset(TOKEN_KEYWORDS)
-	_symbols 			= frozenset(SYMBOLS)
-	_whiteSpace			= frozenset(WHITE_SPACE)
+	_tokenTypes         = frozenset(TOKEN_TYPES)
+	_keywords           = frozenset(TOKEN_KEYWORDS)
+	_symbols            = frozenset(SYMBOLS)
+	_whiteSpace         = frozenset(WHITE_SPACE)
 
 	def __init__(self, filename):
 		self.file = open(filename, 'r')
@@ -28,31 +28,39 @@ class JackTokenizer:
 
 	def hasMoreTokens(self):
 		while True:
-			currentChar = self._peek()
-			if currentChar == "":
+			if self._peek() == "":
 				return False
 
 			# Skipping spaces and newlines:
 			while self._peek() in self._whiteSpace:
 				self._pop()
 			# Skipping comments:
-			if self._peek() == '/':
-				self._pop()
-				if self._peek() == '/': # "// comment to EOL"
+			cs = self._peek(2)
+			while cs in ["//", "/*"]:
+				if self._peek(2) == "//":
 					self._skipLine()
 				else:
 					self._skipComment()
 
-			if self._peekWord() != "":
-				currentChar = self._peek()
-				# It could be a token: it is not a comment or whitespace or EOF.
-				if currentChar != "/" and currentChar not in self._whiteSpace:
-					return True
+				cs = self._peek(2)
+
+			if self._peek() not in self._whiteSpace:
+				# It could be a token: it is not a comment or whitespace or EOF
+				return True
 
 	def advance(self):
 		if self.hasMoreTokens():
-			self.currentToken = self._peekWord()
-			self._pop(len(self.currentToken))
+			if self._peek() != '"':
+				self.currentToken = self._peekWord()
+				self._pop(len(self.currentToken))
+			else:
+				string_const = self._pop() # Opening "
+				while self._peek() != '"':
+					string_const = string_const + self._pop()
+				string_const = string_const + self._pop() # Closing "
+
+				self.currentToken = string_const
+			
 
 	def tokenType(self):
 		token = self.currentToken.upper()
@@ -128,14 +136,13 @@ class JackTokenizer:
 		if currentChar in self._symbols:
 			res = currentChar
 		else:
-			while (currentChar not in self._whiteSpace) and (currentChar != ""):
+			while (currentChar != "") and (currentChar not in self._whiteSpace):
 				if currentChar in self._symbols:
 					break
 				res = res + currentChar
 				currentChar = self._pop()
 		self.file.seek(originalPos)
 		return res
-
 
 def main():
 	if len(sys.argv) < 2:
@@ -149,7 +156,7 @@ def main():
 		print(jt._rawToken(), jt.tokenType(), sep='\t')
 		jt.advance()
 
-	print(jt._rawToken(), jt.tokenType(), sep='\t')	
+	print(jt._rawToken(), jt.tokenType(), sep='\t') 
 
 if __name__ == '__main__':
 	main()
