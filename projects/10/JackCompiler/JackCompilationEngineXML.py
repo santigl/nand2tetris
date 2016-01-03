@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import JackTokenizer
 
 class JackCompilationEngineXML():

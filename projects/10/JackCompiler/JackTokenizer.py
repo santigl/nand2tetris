@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+
 # String constants:
 TOKEN_TYPES = ["KEYWORD", "SYMBOL", "IDENTIFIER", "INT_CONST", "STRING_CONST"]
 
@@ -25,6 +26,9 @@ class JackTokenizer:
 		self.currentToken = ""
 		if self.hasMoreTokens():
 			self.advance()
+
+	def __del__(self):
+		self.file.close()
 
 	def hasMoreTokens(self):
 		while True:
@@ -61,7 +65,6 @@ class JackTokenizer:
 
 				self.currentToken = string_const
 			
-
 	def tokenType(self):
 		token = self.currentToken.upper()
 		if token in self._symbols:
@@ -160,4 +163,3 @@ def main():
 
 if __name__ == '__main__':
 	main()
-	
