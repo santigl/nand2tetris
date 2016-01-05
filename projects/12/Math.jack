@@ -8,31 +8,137 @@
  */
 class Math {
 
+    static Array twoToThe;
+
     /** Initializes the library. */
     function void init() {
+        // Initializing the powers-of-2 table:
+        var int i;
+
+        let twoToThe = Array.new(16);
+        let twoToThe[0] = 1;
+
+        let i = 1;
+        while (i < 16) {
+            let twoToThe[i] = twoToThe[i-1] + twoToThe[i-1];
+            let i = i + 1;
+        }
+
+        return;
     }
 
     /** Returns the absolute value of x. */
     function int abs(int x) {
+        if (x > 0) {
+            return x;
+        }
+        return -x;
     }
 
     /** Returns the product of x and y. */
     function int multiply(int x, int y) {
+        var int sum, shiftedX, i;
+        let sum = 0;
+        let shiftedX = x;
+        let i = 0;
+
+        while (i < 16) {
+            if (Math.bits(y, i) = 1) {
+                let sum = sum + shiftedX;
+            }
+            let shiftedX = shiftedX + shiftedX; // Shifting once to the left.
+            let i = i + 1;
+        }
+        return sum;
     }
 
     /** Returns the integer part of x/y. */
     function int divide(int x, int y) {
+        var int res;
+        var bool negate;
+        let negate = false;
+
+        if (y = 0) {
+            // Throw error?
+            return 0;
+        }
+
+        if (x < 0) {
+            let x = -x;
+            let negate = true;
+        }
+        if (y < 0) {
+            let y = -y;
+            let negate = ~negate;
+        }
+
+        let res = Math.divideHelper(x, y);
+
+        if (negate = true) {
+            return -res;
+        }
+        return res;
+
+    }
+
+    function int divideHelper(int x, int y) {
+        var int q;
+        var int qy;
+        if (y > x) {
+            return 0;
+        }
+
+        let q = Math.divideHelper(x, y+y);
+        let qy = q*y;
+
+        if (x - (qy+qy) < y) {
+            return (q + q);
+        }
+        return (q + q + 1);
     }
 
     /** Returns the integer part of the square root of x. */
     function int sqrt(int x) {
+        var int y, j;
+        var int yPlus2j;
+        var int yPlus2jSquared;
+
+        let y = 0;
+        let j = 7; // (16 bits/2) - 1
+
+        while (~(j < 0)) { // j >=0
+            let yPlus2j = y + twoToThe[j];
+            let yPlus2jSquared = yPlus2j * yPlus2j;
+
+            if (~(yPlus2jSquared > x) & (yPlus2jSquared > 0)) { // (y + 2^j)^2 <= x
+                let y = yPlus2j;
+            }
+            let j = j - 1;
+        }
+        return y;
     }
 
     /** Returns the greater number. */
     function int max(int a, int b) {
+        if (a > b) {
+            return a;
+        }
+        return b;
     }
 
     /** Returns the smaller number. */
     function int min(int a, int b) {
+        if (a < b) {
+            return a;
+        }
+        return b;
+    }
+
+    /** Returns the i-th bit of x, */
+    function int bits(int x, int i) {
+        if (x & twoToThe[i] = 0) {
+            return 0;
+        }
+        return 1;
     }
 }
