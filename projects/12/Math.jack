@@ -37,17 +37,19 @@ class Math {
 
     /** Returns the product of x and y. */
     function int multiply(int x, int y) {
-        var int sum, shiftedX, i;
+        var int sum, shiftedX, i, mask;
         let sum = 0;
         let shiftedX = x;
         let i = 0;
+        let mask = 1;
 
         while (i < 16) {
-            if (Math.bits(y, i) = 1) {
+            if ((mask & y) = mask) { // Checking i-th bit.
                 let sum = sum + shiftedX;
             }
             let shiftedX = shiftedX + shiftedX; // Shifting once to the left.
             let i = i + 1;
+            let mask = mask + mask;
         }
         return sum;
     }
