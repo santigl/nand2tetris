@@ -50,13 +50,13 @@ class Keyboard {
         let key = 0;
 
         while (key = 0) {   // Waiting until a key is pressed...
-            let key = keyboard_addr[0];
+            let key = Keyboard.keyPressed();
         }
 
         let c = key;
 
         while (~(key = 0)) { // Waiting until it is released...
-            let key = keyboard_addr[0];
+            let key = Keyboard.keyPressed();
         }
 
         do Output.printChar(c);
