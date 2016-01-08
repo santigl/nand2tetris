@@ -7,34 +7,247 @@
  * Graphic screen library.
  */
 class Screen {
+    // Video memory base address:
+    static int video_mem_base;
+
+    // Screen dimensions (in rows and columns, respectively):
+    static int screen_height, screen_width;
+
+    // Currently-selected color:
+    static boolean selected_color;
+
 
     /** Initializes the Screen. */
     function void init() {
+        // HW-specific values:
+        let video_mem_base = 16384;
+        let screen_width = 512;
+        let screen_height = 256;
+
+        let selected_color = true;
+        return;
     }
 
     /** Erases the whole screen. */
     function void clearScreen() {
+        var int i, words;
+
+        // Number of 16-bit words in the screen memory:
+        let words = (screen_width/16) * screen_height;
+
+        while (i < words) {
+            let video_mem_base[i] = 0;
+            let i = i + 1;
+        }
+        return;
     }
 
     /** Sets the color to be used in further draw commands
      *  where white = false, black = true. */
     function void setColor(boolean b) {
+        let selected_color = b;
+        return;
     }
 
     /** Draws the (x, y) pixel. */
     function void drawPixel(int x, int y) {
+        var int offset, mask;
+
+        let offset = (32*y) + (x/16);
+        // Computing y%16 using &: bits 7-4 are cleared.
+        let mask = Math.powerOfTwo(x & 15); // (x % 16)-th bit set, the rest clear.
+
+        if (selected_color) { // We want to set the bit.
+            let video_mem_base[offset] = video_mem_base[offset] | mask;
+        }
+        else { // We want to clear the bit.
+            let video_mem_base[offset] = video_mem_base[offset] & ~mask;
+
+        }
+        return;
     }
 
     /** Draws a line from (x1, y1) to (x2, y2). */
     function void drawLine(int x1, int y1, int x2, int y2) {
+        var int dx, dy, temp;
+
+        if (x1 = x2) {
+            do Screen.drawVerticalLine(x1, Math.min(y1, y2), Math.max(y1, y2));
+            return;
+        }
+        if (y1 = y2) {
+            do Screen.drawHorizontalLine(y1, Math.min(x1, x2), Math.max(x1, x2));
+            return;
+        }
+
+        if (x1 > x2) { // Swap coordinates so that x2 > x1.
+            let temp = x1;
+            let x1 = x2;
+            let x2 = temp;
+
+            let temp = y1;
+            let y1 = y2;
+            let y2 = temp;
+        }
+
+        let dx = x2 - x1;
+        let dy = y2 - y1;
+
+        do Screen.drawDiagonalLine(x1, y1, x2, y2, dx, dy);
+        return;
+    }
+
+    function void drawVerticalLine(int x, int y1, int y2) {
+    // PRE: y2 > y1
+        while (~(y2 < y1)) {
+            do Screen.drawPixel(x, y1);
+            let y1 = y1 + 1;
+        }
+        return;
+    }
+
+    function void drawHorizontalLine(int y, int x1, int x2) {
+    // PRE: x2 > x1
+    // Attemps to draw in word-length portions instead of pixel by pixel.
+        var int left, right, x1Mod16, x2Mod16;
+
+        if (x2 - x1 < 15) { // Line is shorter than 16px.
+            do Screen.drawHorizontalLinePx(y, x1, x2);
+            return;
+        }
+
+        let x1Mod16 = x1 & 15;
+        let x2Mod16 = x2 & 15;
+
+        let left = (32*y) + (x1/16);
+        let right = (32*y) + (x2/16);
+
+        // Drawing the remanining pixels of the line that aren't inside a 16-bit word.
+        if (~(x1Mod16 = 0)) {   // Leading portion.
+            do Screen.drawHorizontalLinePx(y, x1, x1 + (16 - x1Mod16));
+            let left = left + 1;
+        }
+        if (~(x2Mod16 = 0)) {   // Trailing portion.
+            do Screen.drawHorizontalLinePx(y, x2 - x2Mod16, x2);
+            let right = right - 1;
+        }
+        // Now we can draw the rest of the line in word chunks:
+        while (~(left > right)) {
+            let video_mem_base[left] = selected_color;
+            let left = left + 1;
+        }
+
+        return;
+    }
+
+    function void drawDiagonalLine(int x1, int y1, int x2, int y2, int dx, int dy) {
+    // PRE: x2 > x1 => dx > 0
+        var int a, b, adyMinusbdx, step, inRange;
+
+        let a = 0;
+        let b = 0;
+        let adyMinusbdx = 0;
+
+        if (dy > 0) {
+            let step = 1;
+        }
+        else {
+            let step = -1;
+        }
+
+        while ((a < dx) & (((step > 0) & (b < dy)) | ((step < 0) & (b > dy)))) {
+            do Screen.drawPixel(x1 + a, y1 + b);
+            if (adyMinusbdx < 0) {
+                let a = a + 1;
+                let adyMinusbdx = adyMinusbdx + (dy*step);
+            }
+            else{
+                let b = b + step;
+                let adyMinusbdx = adyMinusbdx - dx;
+            }
+        }
+
+        return;
+    }
+
+    function void drawHorizontalLinePx(int y, int x1, int x2) {
+    // PRE: x2 > x1
+        while (~(x1 > x2)) {
+            do Screen.drawPixel(x1, y);
+            let x1 = x1 + 1;
+        }
+        return;
     }
 
     /** Draws a filled rectangle where the top left corner
      *  is (x1, y1) and the bottom right corner is (x2, y2). */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
+        while (y1 < y2) {
+            do Screen.drawHorizontalLine(y1, x1, x2);
+            let y1 = y1 + 1;
+        }
+        return;
     }
 
     /** Draws a filled circle of radius r around (cx, cy). */
     function void drawCircle(int cx, int cy, int r) {
+        //do Screen.drawCircleSquareRoot(cx, cy, r);
+        do Screen.midPointCircle(cx, cy, r);
+        return;
+    }
+
+    function void drawCircleSquareRoot(int x, int y, int r) {
+        var int dy, sr;
+
+        let dy = -r;
+
+        while (~(dy > r)) { // dy \in [-r, r]
+            let sr = Math.sqrt((r*r) - (dy*dy));
+            do Screen.drawHorizontalLinePx(y + dy, x - sr, x + sr);
+            let dy = dy + 1;
+        }
+
+        return;
+
+    }
+
+    function void midPointCircle(int x0, int y0, int r) {
+    // Midpoint circle algorithm.
+    // (https://en.wikipedia.org/wiki/Midpoint_circle_algorithm)
+        var int x, y, decisionOver2;
+
+        let x = r;
+        let y = 0;
+        let decisionOver2 = 1 - x;
+
+        while (~(y > x)) {
+
+            /* This would draw only the perimeter:
+            do Screen.drawPixel( x + x0,  y + y0); // Octant 1
+            do Screen.drawPixel(-x + x0,  y + y0); // Octant 4
+            do Screen.drawPixel(-y + x0,  x + y0); // Octant 3
+            do Screen.drawPixel( y + x0,  x + y0); // Octant 2
+            do Screen.drawPixel(-x + x0, -y + y0); // Octant 5
+            do Screen.drawPixel( x + x0, -y + y0); // Octant 8
+            do Screen.drawPixel(-y + x0, -x + y0); // Octant 6
+            do Screen.drawPixel( y + x0, -x + y0); // Octant 7*/
+
+            do Screen.drawHorizontalLinePx(x + y0, -y + x0 , y + x0);
+            do Screen.drawHorizontalLinePx(-x + y0, -y + x0, y + x0);
+            do Screen.drawHorizontalLinePx(y + y0, -x + x0,  x + x0);
+            do Screen.drawHorizontalLinePx(-y + y0, -x + x0, x + x0);
+
+            let y = y + 1;
+
+            if (decisionOver2 > 0) {
+                let x = x - 1;
+                let decisionOver2 = decisionOver2 + y + y - x - x  + 1;
+            }
+            else {
+                let decisionOver2 = decisionOver2 + y + y + 1;
+            }
+        }
+
+        return;
     }
 }
