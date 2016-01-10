@@ -230,7 +230,8 @@ class Screen {
             do Screen.drawPixel(-x + x0, -y + y0); // Octant 5
             do Screen.drawPixel( x + x0, -y + y0); // Octant 8
             do Screen.drawPixel(-y + x0, -x + y0); // Octant 6
-            do Screen.drawPixel( y + x0, -x + y0); // Octant 7*/
+            do Screen.drawPixel( y + x0, -x + y0); // Octant 7
+            */
 
             do Screen.drawHorizontalLinePx(x + y0, -y + x0 , y + x0);
             do Screen.drawHorizontalLinePx(-x + y0, -y + x0, y + x0);

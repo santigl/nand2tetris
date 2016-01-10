@@ -101,7 +101,6 @@ class String {
         return;
     }
 
-
     method void setIntHelper(int number) {
         var int last_digit, c;
         let last_digit = number - (10*(number/10)); // number % 10

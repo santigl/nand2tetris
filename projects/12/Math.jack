@@ -136,11 +136,16 @@ class Math {
         return b;
     }
 
-    /** Returns the i-th bit of x, */
+    /** Returns the i-th bit of x. */
     function int bits(int x, int i) {
         if (x & twoToThe[i] = 0) {
             return 0;
         }
         return 1;
+    }
+
+    /** Returns 2^i (for use outside of the Math class). */
+    function int powerOfTwo(int i) {
+        return twoToThe[i];
     }
 }
