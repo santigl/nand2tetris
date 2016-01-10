@@ -5,28 +5,113 @@
 
 /**
  * Memory operations library.
- */ 
+ */
 class Memory {
+
+
+    static int heap_base;
+    static int heap_end;
+    static int free_list;
 
     /** Initializes memory parameters. */
     function void init() {
+        let heap_base = 2048;
+        let heap_end = 16383;
+        let free_list = 2048;
+        let free_list[0] = heap_end - heap_base;
+        let free_list[1] = null; // Next pointer.
+        return;
     }
 
     /** Returns the value of the main memory at the given address. */
     function int peek(int address) {
+        return address[0];
     }
 
     /** Sets the value of the main memory at this address
      *  to the given value. */
     function void poke(int address, int value) {
+        let address[0] = value;
+        return;
     }
 
-    /** finds and allocates from the heap a memory block of the 
+    /** finds and allocates from the heap a memory block of the
      *  specified size and returns a reference to its base address. */
     function int alloc(int size) {
+        return Memory.allocFirstFit(size);
     }
 
     /** De-allocates the given object and frees its space. */
     function void deAlloc(int object) {
-    }    
+        var Array previous_block, current_block;
+        var Array new_block;
+        var boolean gap_found;
+
+        let new_block = object - 1; // Point to the actual block start.
+
+        if (free_list = 0) { // Inserting it at the root.
+            let free_list = new_block;
+            let free_list[1] = 0;
+            return;
+        }
+
+        let previous_block = free_list;
+        let current_block = free_list[1];
+        let gap_found = false;
+
+        while ((~(current_block = 0)) & (~gap_found)) {
+            if (~(current_block[1] = 0)) {
+                if (new_block < current_block[1]) {
+                    let previous_block = current_block;
+                    let current_block = current_block[1];
+                }
+            }
+            else {
+                let gap_found = true;
+            }
+        }
+
+        let previous_block[1] = new_block;
+        let new_block[1] = current_block;
+
+        return;
+    }
+
+    function int allocFirstFit(int size) {
+        var Array previous_block, current_block;
+        var Array new_block;
+
+        let previous_block = null;
+        let current_block = free_list;
+
+        while (~(current_block = 0)) {
+            if ((current_block[0] - 1) = size) { // Alloc the whole block.
+                do Memory.deleteBlock(previous_block, current_block);
+                return current_block + 1;
+            }
+            if (current_block[0] > (size + 2)) {
+                let current_block[(current_block[0] - 1) - size] = size + 1;
+                let new_block = current_block + current_block[0] - size;
+                let current_block[0] = current_block[0] - size - 1;
+                return new_block;
+            }
+            // Go to the next block:
+            let previous_block = current_block;
+            let current_block = current_block[1];
+        }
+
+        do Sys.error(6);
+        return null;
+    }
+
+    function void deleteBlock(int previous_block, int current_block) {
+        if (previous_block = 0) {
+            let free_list = current_block[1];   // New head.
+        }
+        else {
+            let previous_block[1] = current_block[1]; // previous.next = current.next
+        }
+
+        return;
+    }
 }
