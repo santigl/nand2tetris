@@ -8,7 +8,7 @@
  */
 class Screen {
     // Video memory base address:
-    static int video_mem_base;
+    static Array video_mem_base;
 
     // Screen dimensions (in rows and columns, respectively):
     static int screen_height, screen_width;
@@ -151,7 +151,7 @@ class Screen {
         if (dy > 0) {
             let step = 1;
         }
-        else {
+        else { // Considering the case where dy is negative.
             let step = -1;
         }
 
@@ -159,7 +159,7 @@ class Screen {
             do Screen.drawPixel(x1 + a, y1 + b);
             if (adyMinusbdx < 0) {
                 let a = a + 1;
-                let adyMinusbdx = adyMinusbdx + (dy*step);
+                let adyMinusbdx = adyMinusbdx + (dy*step); // +/- 1 accordingly.
             }
             else{
                 let b = b + step;

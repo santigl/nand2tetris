@@ -17,7 +17,8 @@ class Memory {
     function void init() {
         let heap_base = 2048;
         let heap_end = 16383;
-        let free_list = 2048;
+
+        let free_list = heap_base;
         let free_list[0] = heap_end - heap_base;
         let free_list[1] = null; // Next pointer.
         return;
@@ -49,12 +50,13 @@ class Memory {
 
         let new_block = object - 1; // Point to the actual block start.
 
-        if (free_list = 0) { // Inserting it at the root.
+        if (free_list = 0) { // The list is empty: inserting it at the root.
             let free_list = new_block;
             let free_list[1] = 0;
             return;
         }
-
+        // Looking for a gap to insert our block so that the list is always
+        // sorted by block start-address:
         let previous_block = free_list;
         let current_block = free_list[1];
         let gap_found = false;
@@ -71,6 +73,7 @@ class Memory {
             }
         }
 
+        // Inserting the deallocated block in that gap:
         let previous_block[1] = new_block;
         let new_block[1] = current_block;
 
@@ -85,16 +88,19 @@ class Memory {
         let current_block = free_list;
 
         while (~(current_block = 0)) {
+
             if ((current_block[0] - 1) = size) { // Alloc the whole block.
                 do Memory.deleteBlock(previous_block, current_block);
                 return current_block + 1;
             }
+
             if (current_block[0] > (size + 2)) {
                 let current_block[(current_block[0] - 1) - size] = size + 1;
                 let new_block = current_block + current_block[0] - size;
                 let current_block[0] = current_block[0] - size - 1;
                 return new_block;
             }
+
             // Go to the next block:
             let previous_block = current_block;
             let current_block = current_block[1];
