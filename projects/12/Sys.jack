@@ -14,6 +14,7 @@ class Sys {
         do Math.init();
         do Screen.init();
         do Output.init();
+        do Keyboard.init();
         do Main.main();
 
         return;
