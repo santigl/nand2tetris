@@ -8,7 +8,8 @@
  */
 class Keyboard {
 
-    static int keyboard_addr;
+    static Array keyboard_addr;
+
     /** Initializes the keyboard. */
     function void init() {
         let keyboard_addr = 24576;
@@ -50,13 +51,13 @@ class Keyboard {
         let key = 0;
 
         while (key = 0) {   // Waiting until a key is pressed...
-            let key = Keyboard.keyPressed();
+            let key = keyboard_addr[0];
         }
 
         let c = key;
 
         while (~(key = 0)) { // Waiting until it is released...
-            let key = Keyboard.keyPressed();
+            let key = keyboard_addr[0];
         }
 
         do Output.printChar(c);
