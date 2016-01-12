@@ -53,6 +53,10 @@ class Screen {
     function void drawPixel(int x, int y) {
         var int offset, mask;
 
+        if (~Screen.validCoordinate(x, y)) {
+            do Sys.error(7); //  7 Screen.drawPixel Illegal pixel coordinates
+        }
+
         let offset = (32*y) + (x/16);
         // Computing y%16 using &: bits 7-4 are cleared.
         let mask = Math.powerOfTwo(x & 15); // (x % 16)-th bit set, the rest clear.
@@ -70,6 +74,11 @@ class Screen {
     /** Draws a line from (x1, y1) to (x2, y2). */
     function void drawLine(int x1, int y1, int x2, int y2) {
         var int dx, dy, temp;
+
+        if ((~Screen.validCoordinate(x1, y1)) |
+            (~Screen.validCoordinate(x2, y2))) {
+            do Sys.error(8); // 8 Screen.drawLine Illegal line coordinates
+        }
 
         if (x1 = x2) {
             do Screen.drawVerticalLine(x1, Math.min(y1, y2), Math.max(y1, y2));
@@ -182,6 +191,12 @@ class Screen {
     /** Draws a filled rectangle where the top left corner
      *  is (x1, y1) and the bottom right corner is (x2, y2). */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
+
+        if ((~Screen.validCoordinate(x1, y1)) |
+            (~Screen.validCoordinate(x2, y2))) {
+            do Sys.error(9); //  9 Screen.drawRectangle Illegal rectangle coordinates
+        }
+
         while (y1 < y2) {
             do Screen.drawHorizontalLine(y1, x1, x2);
             let y1 = y1 + 1;
@@ -191,6 +206,17 @@ class Screen {
 
     /** Draws a filled circle of radius r around (cx, cy). */
     function void drawCircle(int cx, int cy, int r) {
+        if (~Screen.validCoordinate(cx, cy)) {
+            do Sys.error(12); // 12 Screen.drawCircle Illegal center coordinates
+        }
+        if (r = 0) {
+            return;
+        }
+        if (r < 0) {
+            do Sys.error(13); // 13 Screen.drawCircle Illegal radius
+        }
+
+
         //do Screen.drawCircleSquareRoot(cx, cy, r);
         do Screen.midPointCircle(cx, cy, r);
         return;
@@ -250,5 +276,16 @@ class Screen {
         }
 
         return;
+    }
+
+
+    function boolean validCoordinate(int x, int y) {
+    // Checks that x and y are inside the valid range.
+        if ((x < 0) | (x > (screen_width-1)) |
+            (y < 0) | (y > (screen_height-1))) {
+            return false;
+        }
+
+        return true;
     }
 }

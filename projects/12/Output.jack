@@ -198,6 +198,10 @@ class Output {
     /** Moves the cursor to the j’th column of the i’th row,
      *  and erases the character that was there. */
     function void moveCursor(int i, int j) {
+        if ((i < 0) | (i > (screen_height-1)) | (j < 0) | (j > (screen_width-1))) {
+            do Sys.error(20); // 20 Output.moveCursor Illegal cursor location
+        }
+
         let cursor_x = j;
         let cursor_y = i;
 

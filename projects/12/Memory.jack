@@ -39,6 +39,10 @@ class Memory {
     /** finds and allocates from the heap a memory block of the
      *  specified size and returns a reference to its base address. */
     function int alloc(int size) {
+        if (size < 0) {
+            do Sys.error(5); // 5 Memory.alloc Allocated memory size must be positive
+        }
+
         return Memory.allocFirstFit(size);
     }
 
@@ -106,7 +110,8 @@ class Memory {
             let current_block = current_block[1];
         }
 
-        do Sys.error(6);
+        // If we get here, it's because no memory could be allocated.
+        do Sys.error(6); // 6 Memory.alloc Heap overflow
         return null;
     }
 

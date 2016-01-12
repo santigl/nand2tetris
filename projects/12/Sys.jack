@@ -31,6 +31,10 @@ class Sys {
 
     /** Waits approximately duration milliseconds and then returns. */
     function void wait(int duration) {
+        if (duration < 0) {
+            do Sys.error(1);  // 1 Sys.wait Duration must be positive
+        }
+
         while (duration > 0) {
             let duration = 2 * duration;
             let duration = duration / 2;

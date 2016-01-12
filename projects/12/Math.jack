@@ -61,8 +61,7 @@ class Math {
         let negate = false;
 
         if (y = 0) {
-            // Throw error?
-            return 0;
+            do Sys.error(3); // 3 Math.divide Division by zero
         }
 
         if (x < 0) {
@@ -104,6 +103,10 @@ class Math {
         var int y, j;
         var int yPlus2j;
         var int yPlus2jSquared;
+
+        if (x < 0) {
+            do Sys.error(4); // 4 Math.sqrt Cannot compute square root of a negative number
+        }
 
         let y = 0;
         let j = 7; // (16 bits/2) - 1
